@@ -6,3 +6,7 @@ obj/
 *.local.json
 TestResults/
 out/
+
+# Local notes
+/Implementation.md
+/DatabaseConnection.md

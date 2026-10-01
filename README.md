@@ -1,8 +1,41 @@
-# AI Chatbot with ASP.NET Core
+# Real Estate AI Chatbot with ASP.NET Core
 
-A production-oriented chatbot: ASP.NET Core Web API (.NET 10), EF Core + SQL Server, JWT authentication,
+**Chatbot by AI Engineering Foundry**: a real estate assistant for buyers, sellers, renters, landlords, investors
+and agents.
+
+It's built as a production-oriented chatbot: ASP.NET Core Web API (.NET 10), EF Core + SQL Server, JWT authentication,
 SignalR streaming, and Claude (Anthropic) as the AI provider behind a swappable `IAiChatService` abstraction.
 The front end is a Razor Pages app with a vanilla-JS chat client (Markdown, code highlighting, responsive layout).
+
+## What the assistant helps with
+
+- **Buying and selling:** budgets and price ranges, the steps of a purchase or sale, offers, inspections and closing costs.
+- **Financing basics:** mortgage payments, loan term comparisons, down payments, PMI and debt-to-income ratios.
+- **Valuation and markets:** how comparables work and what drives prices and trends.
+- **Investing:** cash flow, cap rate, cash-on-cash return and ROI, with the working shown.
+- **Renting and property management:** leases, landlord and tenant questions, running a rental.
+- **Marketing:** listing descriptions for property listings, social posts and MLS entries.
+
+Example questions:
+
+> I earn $90,000 a year and have $40,000 saved. What price range should I target as a first-time buyer?
+>
+> Compare a 15-year and a 30-year mortgage on a $350,000 loan at 6.5% in a table.
+>
+> What's the difference between cap rate and cash-on-cash return?
+>
+> Write a listing description for a 3-bed, 2-bath townhouse with a renovated kitchen and a park across the street.
+
+### Guardrails
+
+The system prompt tells the assistant to:
+
+- Ask about location, budget and goals when the answer depends on them, and show its working for calculations.
+- Say when an answer needs live listings or current market data, which it doesn't have, and suggest where to check.
+- Give general information, not legal, tax or financial advice, and point users to a licensed agent, attorney,
+  lender or tax professional for decisions. Laws and taxes vary by country and region.
+- Follow fair housing principles: never discriminate or steer based on protected characteristics, and describe
+  properties rather than who they're "ideal for".
 
 ## Screenshots
 
@@ -11,13 +44,25 @@ Desktop captures are 3840×2160 (1920×1080 at 2×); mobile captures are 1170×2
 | | |
 |---|---|
 | ![Sign in](screenshots/01-sign-in.png) | ![Create account](screenshots/02-create-account.png) |
-| ![New conversation](screenshots/03-new-conversation.png) | ![Streaming response](screenshots/04-streaming-response.png) |
-| ![Code highlighting](screenshots/05-code-highlighting.png) | ![Follow-up using context, Markdown table](screenshots/06-follow-up-with-context.png) |
-| ![Multiple conversations](screenshots/07-multiple-conversations.png) | ![Light theme](screenshots/08-light-theme.png) |
+| ![New conversation](screenshots/03-new-conversation.png) | ![Streaming answer to a first-time buyer's budget question](screenshots/04-streaming-response.png) |
+| ![Python mortgage payment calculator with code highlighting](screenshots/05-code-highlighting.png) | ![Follow-up comparing 15- and 30-year loans, using earlier context](screenshots/06-follow-up-with-context.png) |
+| ![Several real estate conversations](screenshots/07-multiple-conversations.png) | ![Light theme](screenshots/08-light-theme.png) |
 
-| Mobile chat | Mobile sidebar |
+| Mobile chat (listing description) | Mobile sidebar |
 |---|---|
 | <img src="screenshots/09-mobile-chat.png" width="300" /> | <img src="screenshots/10-mobile-sidebar.png" width="300" /> |
+
+## Customizing the assistant
+
+The assistant's role comes from one setting, `Anthropic:SystemPrompt`, in `src/Chatbot.Api/appsettings.json`.
+Edit it to narrow the focus, for example commercial property only or one country's market, then restart the API.
+`AnthropicOptions.SystemPrompt` in `src/Chatbot.Infrastructure/Ai/AnthropicOptions.cs` holds the default used when the
+setting is missing; keep the two in sync.
+
+The earlier general-purpose prompt is kept as a `//` comment above the setting in both files. ASP.NET Core's JSON
+configuration reader accepts comments in `appsettings.json`.
+
+The product name shown in the UI ("Chatbot" with "AI Engineering Foundry") lives in `src/Chatbot.Web/Pages/Index.cshtml`.
 
 ## Project structure
 
@@ -101,7 +146,7 @@ environment variable using `__` as the section separator (e.g. `Anthropic__ApiKe
 | `Anthropic:ApiKey` | **Secret.** Falls back to the `ANTHROPIC_API_KEY` env var |
 | `Anthropic:Model` | Default `claude-opus-5-5` |
 | `Anthropic:MaxTokens`, `Anthropic:Effort` | Output cap and reasoning effort (`low`…`max`) |
-| `Anthropic:SystemPrompt` | System prompt for every conversation |
+| `Anthropic:SystemPrompt` | System prompt for every conversation (the real estate assistant's role and guardrails) |
 | `Chat:MaxMessageLength`, `Chat:MaxHistoryMessages` | Input limit and context window (messages) |
 | `Cors:AllowedOrigins` | Front-end origins allowed to call the API |
 | `RateLimiting:*` | Per-minute limits: global, chat (per user), auth (per IP) |
@@ -135,7 +180,7 @@ dotnet run --project src/Chatbot.Api --launch-profile https   # https://localhos
 dotnet run --project src/Chatbot.Web --launch-profile https   # https://localhost:7187
 ```
 
-Open https://localhost:7187, create an account and start chatting. In Development the API also applies pending
+Open https://localhost:7187, create an account and ask a real estate question. In Development the API also applies pending
 migrations on startup.
 
 ### EF Core migration commands

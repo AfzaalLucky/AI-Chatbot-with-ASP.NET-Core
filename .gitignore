@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+*.user
+*.db
+*.local.json
+TestResults/
+out/
